@@ -11,11 +11,11 @@ class LinksRepository:
         self._db = db
 
     # Add new link
-    async def add_link(self, original_link: str, short_link: str) -> None:
+    async def add_link(self, original_link: str, short_key: str) -> None:
 
         stmt = (
             insert(Link)
-            .values(original_link=original_link, short_link=short_link, clicks=0)
+            .values(original_link=original_link, short_link=short_key, clicks=0)
         )
 
         try:
@@ -27,11 +27,11 @@ class LinksRepository:
             await self._db.rollback()
 
     # Get redirect link by short
-    async def get_redirect_link(self, short_link: str) -> str:
+    async def get_redirect_link(self, short_key: str) -> str:
 
         stmt = (
             select(Link.original_link)
-            .where(Link.short_link == short_link)
+            .where(Link.short_key == short_key)
         )
         try:
             result = await self._db.execute(stmt)
@@ -46,11 +46,11 @@ class LinksRepository:
             return ""
 
     # Increases the number of clicks by 1
-    async def increase_click(self, short_link: str) -> None:
+    async def increase_click(self, short_key: str) -> None:
 
         stmt = (
             update(Link)
-            .where(Link.short_link == short_link)
+            .where(Link.short_key == short_key)
             .values(clicks=Link.clicks + 1)
         )
 
@@ -63,11 +63,11 @@ class LinksRepository:
             await self._db.rollback()
 
     # Get clicks number
-    async def  get_link_stats(self, short_link: str) -> int:
+    async def  get_link_stats(self, short_key: str) -> int:
 
         stmt = (
             select(Link.clicks)
-            .where(Link.short_link == short_link)
+            .where(Link.short_key == short_key)
         )
 
         try:
@@ -81,11 +81,11 @@ class LinksRepository:
             return 0
 
     # Get short link by short link
-    async def get_short_link(self, short_link: str) -> str | None:
+    async def get_short_link(self, short_key: str) -> str | None:
 
         stmt = (
-            select(Link.short_link)
-            .where(Link.short_link == short_link)
+            select(Link.short_key)
+            .where(Link.short_key == short_key)
         )
 
         try:

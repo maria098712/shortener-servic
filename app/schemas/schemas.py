@@ -1,9 +1,11 @@
 from pydantic import BaseModel
 
 
-class ShortenLinkResponse(BaseModel):
+class CreateShortLinkResponse(BaseModel):
     short_link: str
 
-class ShortenLink(BaseModel):
-
+class CreateShortLinkRequest(BaseModel):
     original_link: str
+
+class RedirectUserRequest(BaseModel):
+    short_link: str
