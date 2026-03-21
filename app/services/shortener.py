@@ -16,6 +16,8 @@ class Shortener:
 
     async def shorten(self, original_link: str) -> str:
 
+        original_link = self._http_check(original_link)
+
         short_key = self._generate_random_string()  # Get short link
 
         try:
@@ -39,6 +41,23 @@ class Shortener:
     @staticmethod
     def _generate_random_string() -> str:
         return ''.join(random.choices(string.ascii_letters + string.digits, k=6))  # k = length
+
+    # This for FastApi can redirect normally
+    @staticmethod
+    def _http_check (original_link: str) -> str:
+
+        if original_link[0:4] == "http":
+            return original_link
+
+        else:
+            # If possible -> http will automatically become https
+            return "http://" + original_link
+
+
+
+
+
+
 
 
 

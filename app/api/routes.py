@@ -10,6 +10,7 @@ from fastapi import FastAPI, Request
 
 router = APIRouter()
 
+# Get short link
 @router.post("/shorten", response_model=CreateShortLinkResponse)
 async def shorten_link(link: CreateShortLinkRequest, shortener: Shortener = Depends(get_shortener)):
 
@@ -17,6 +18,7 @@ async def shorten_link(link: CreateShortLinkRequest, shortener: Shortener = Depe
 
     return CreateShortLinkResponse(short_link=short_link)
 
+# Service endpoint (redirect user on original link)
 @router.get("/{short_id}", response_class=RedirectResponse)
 async def redirect_user(request: Request, links_repo: LinksRepository = Depends(get_links_repo)):
 
@@ -28,6 +30,7 @@ async def redirect_user(request: Request, links_repo: LinksRepository = Depends(
 
     return RedirectResponse(url=redirect_link)
 
+# Get number of hits on a link
 @router.get("/stats/{short_id}", response_model=GetLinkHitsResponse)
 async def get_links_stats(request: Request, links_repo: LinksRepository = Depends(get_links_repo)):
 
@@ -35,7 +38,11 @@ async def get_links_stats(request: Request, links_repo: LinksRepository = Depend
 
     link_clicks = await links_repo.get_link_stats(short_key)
 
-    return GetLinkHitsResponse(clicks=link_clicks)
+    message_with_stat = (
+        f"Количество переходов по данной ссылке: {link_clicks}"
+    )
+
+    return GetLinkHitsResponse(message_with_stat=message_with_stat)
 
 
 
