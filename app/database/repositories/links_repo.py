@@ -15,7 +15,7 @@ class LinksRepository:
 
         stmt = (
             insert(Link)
-            .values(original_link=original_link, short_link=short_key, clicks=0)
+            .values(original_link=original_link, short_key=short_key, clicks=0)
         )
 
         try:

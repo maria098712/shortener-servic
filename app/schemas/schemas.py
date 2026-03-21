@@ -9,3 +9,7 @@ class CreateShortLinkRequest(BaseModel):
 
 class RedirectUserRequest(BaseModel):
     short_link: str
+
+class GetLinkHitsResponse(BaseModel):
+    clicks: int
+

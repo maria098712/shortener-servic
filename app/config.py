@@ -16,7 +16,7 @@ class DBSettings:
     DB_PORT = os.getenv('DB_PORT')
 
     SQLALCHEMY_DATA_BASE_URL = (
-        f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+        f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
     )
 
 

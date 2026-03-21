@@ -15,5 +15,5 @@ async def get_db():
         try:
             yield db
 
-        except Exception as error:
-            lg.error(f"Error while trying get db ->: {error}")
+        finally:
+            await db.close()

@@ -12,7 +12,7 @@ app = FastAPI(
 # Routes connect
 app.include_router(shortener_router)
 
-async def run():
+def run():
     uvicorn.run(
         app,
         host="0.0.0.0",
