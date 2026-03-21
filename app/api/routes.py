@@ -9,3 +9,4 @@ router = APIRouter()
 
 @router.post("/shorten", response_model=ShortenLinkResponse)
 async def shorten_link(link: ShortenLink, db: AsyncSession = Depends(get_db)):
+

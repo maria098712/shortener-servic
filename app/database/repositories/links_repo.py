@@ -8,23 +8,23 @@ class LinksRepository:
 
     # Get session
     def __init__(self, db: AsyncSession):
-        self.db = db
+        self._db = db
 
     # Add new link
-    async def add_link(self, original_link: str, short_link: str, clicks: int) -> None:
+    async def add_link(self, original_link: str, short_link: str) -> None:
 
         stmt = (
             insert(Link)
-            .values(original_link=original_link, short_link=short_link, clicks=clicks)
+            .values(original_link=original_link, short_link=short_link, clicks=0)
         )
 
         try:
-            await self.db.execute(stmt)
-            await self.db.commit()
+            await self._db.execute(stmt)
+            await self._db.commit()
 
         except Exception as error:
             lg.error(f"Error while trying to insert link ->:{error}")
-            await self.db.rollback()
+            await self._db.rollback()
 
     # Get redirect link by short
     async def get_redirect_link(self, short_link: str) -> str:
@@ -34,7 +34,7 @@ class LinksRepository:
             .where(Link.short_link == short_link)
         )
         try:
-            result = await self.db.execute(stmt)
+            result = await self._db.execute(stmt)
             redirect_link = result.scalar_one()
 
             return redirect_link
@@ -42,7 +42,7 @@ class LinksRepository:
         except Exception as error:
 
             lg.error(f"Error while trying to get redirect link ->:{error}")
-            await self.db.rollback()
+            await self._db.rollback()
             return ""
 
     # Increases the number of clicks by 1
@@ -55,26 +55,44 @@ class LinksRepository:
         )
 
         try:
-            await self.db.execute(stmt)
-            await self.db.commit()
+            await self._db.execute(stmt)
+            await self._db.commit()
 
         except Exception as error:
             lg.error(f"Error while trying to update clicks ->:{error}")
-            await self.db.rollback()
+            await self._db.rollback()
 
     # Get clicks number
     async def  get_link_stats(self, short_link: str) -> int:
+
         stmt = (
             select(Link.clicks)
             .where(Link.short_link == short_link)
         )
 
         try:
-            result = await self.db.execute(stmt)
+            result = await self._db.execute(stmt)
             clicks = result.scalar_one()
             return clicks
 
         except Exception as error:
             lg.error(f"Error while trying to get clicks ->:{error}")
-            await self.db.rollback()
+            await self._db.rollback()
             return 0
+
+    # Get short link by short link
+    async def get_short_link(self, short_link: str) -> str | None:
+
+        stmt = (
+            select(Link.short_link)
+            .where(Link.short_link == short_link)
+        )
+
+        try:
+            result = await self._db.execute(stmt)
+            short_link = result.scalar_one()
+            return short_link
+
+        except Exception as error:
+            lg.error(f"Error while trying to get short link ->:{error}")
+            await self._db.rollback()
