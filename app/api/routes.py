@@ -38,11 +38,11 @@ async def get_links_stats(request: Request, links_repo: LinksRepository = Depend
 
     link_clicks = await links_repo.get_link_stats(short_key)
 
-    message_with_stat = (
-        f"Количество переходов по данной ссылке: {link_clicks}"
-    )
+    response = {
+        "link_clicks": link_clicks,
+    }
 
-    return GetLinkHitsResponse(message_with_stat=message_with_stat)
+    return GetLinkHitsResponse(response=response)
 
 
 

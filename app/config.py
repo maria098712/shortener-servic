@@ -1,25 +1,37 @@
 import logging
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
-import os
+
+lg = logging.getLogger()
+
 
 
 load_dotenv()
 
-lg = logging.getLogger()
+class Settings(BaseSettings):
 
-# Variables for db connection
-class DBSettings:
-    DB_USER = os.getenv('DB_USER')
-    DB_PASSWORD = os.getenv('DB_PASSWORD')
-    DB_NAME = os.getenv('DB_NAME')
-    DB_HOST = os.getenv('DB_HOST')
-    DB_PORT = os.getenv('DB_PORT')
+    MODE: str
 
-    SQLALCHEMY_DATA_BASE_URL = (
-        f'postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
-    )
+    #db
+    DB_USER: str
+    DB_PASSWORD: str
+    DB_HOST: str
+    DB_PORT: int
+    DB_NAME: str
 
+    #app
+    BASE_URL: str
 
-BASE_URL = "http://127.0.0.1:8000/"
+    #tests
+    BASE_URL: str
+
+    @property
+    def DB_URL(self) -> str:
+        return f'postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}'
+
+    model_config = SettingsConfigDict(env_file=".env")
+
+settings = Settings()
+
 
 

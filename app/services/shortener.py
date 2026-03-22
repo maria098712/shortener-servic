@@ -2,17 +2,16 @@ import random
 import string
 from sqlalchemy.exc import IntegrityError
 from app.database.repositories.links_repo import LinksRepository
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.config import BASE_URL
+from app.config import settings
 
 
 class Shortener:
 
-    def __init__(self, links_repo: LinksRepository ) -> None:
+    def __init__(self, links_repo: LinksRepository) -> None:
 
         self._links_repo = links_repo
 
-        self._BASE_URL = BASE_URL
+        self._BASE_URL = settings.BASE_URL
 
     async def shorten(self, original_link: str) -> str:
 
