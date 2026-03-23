@@ -36,14 +36,13 @@ class Shortener:
 
         return short_link
 
-
     @staticmethod
     def _generate_random_string() -> str:
         return ''.join(random.choices(string.ascii_letters + string.digits, k=6))  # k = length
 
     # This for FastApi can redirect normally
     @staticmethod
-    def _http_check (original_link: str) -> str:
+    def _http_check(original_link: str) -> str:
 
         if original_link[0:4] == "http":
             return original_link

@@ -62,7 +62,7 @@ class LinksRepository:
             await self._db.rollback()
 
     # Get clicks number
-    async def  get_link_stats(self, short_key: str) -> int:
+    async def get_link_stats(self, short_key: str) -> int:
 
         stmt = (
             select(Link.clicks)

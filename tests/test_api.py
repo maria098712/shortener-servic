@@ -1,15 +1,12 @@
-import httpx
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.database.connection import AsyncSessionLocal, engine
-from collections.abc import AsyncGenerator
+from app.database.connection import engine
 from app.models.base import Base
 from app.config import settings
 from httpx import AsyncClient, ASGITransport
 from app.main import app
 
 
-@pytest.fixture(scope="session",autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 async def setup():
     assert settings.MODE == "TEST"
 
@@ -20,10 +17,8 @@ async def setup():
 
 @pytest.mark.asyncio
 async def test_shorten_link():
-    async with AsyncClient(
-        transport=ASGITransport(app=app),
-        base_url=settings.BASE_URL,
-        ) as ac:
+    async with AsyncClient(transport=ASGITransport(app=app),
+                           base_url=settings.BASE_URL) as ac:
 
         link_without_http = {
             "original_link": "google.com",

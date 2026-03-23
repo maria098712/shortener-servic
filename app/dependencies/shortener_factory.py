@@ -8,5 +8,8 @@ from app.services.shortener import Shortener
 def get_links_repo(db: AsyncSession = Depends(get_db)) -> LinksRepository:
     return LinksRepository(db)
 
-def get_shortener(links_repo: LinksRepository = Depends(get_links_repo)) -> Shortener:
+
+def get_shortener(
+        links_repo: LinksRepository = Depends(get_links_repo)
+        ) -> Shortener:
     return Shortener(links_repo)

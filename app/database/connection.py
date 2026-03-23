@@ -1,6 +1,8 @@
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine,async_sessionmaker
+from sqlalchemy.ext.asyncio import (AsyncSession,
+                                    create_async_engine,
+                                    async_sessionmaker)
 from app.config import settings
-from sqlalchemy.pool import NullPool, QueuePool
+from sqlalchemy.pool import NullPool
 
 
 DB_URL = settings.DB_URL
@@ -16,6 +18,7 @@ AsyncSessionLocal = async_sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False,
 )
+
 
 async def get_db():
     async with AsyncSessionLocal() as db:
