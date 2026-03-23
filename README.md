@@ -25,7 +25,10 @@ git clone https://github.com/kotyra911/shortener-service.git
 ```
 
 Обратите внимание на то, что имя для тестовой базы указывается в init.sql.
-По умолчанию shortener_db_test. Если вы хотите указать свое имя, вам нужно сделать это в .test.env и в init.sql
+По умолчанию shortener_db_test. 
+Если вы хотите указать свое имя, вам нужно сделать это в .test.env и в init.sql.
+
+Также в init.sql вам нужно поменять имена баз в обоих \connect на те, что вы указали
 
 ---
 
