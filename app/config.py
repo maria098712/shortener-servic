@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 
 lg = logging.getLogger()
 
-
-
 load_dotenv()
 
 class Settings(BaseSettings):
@@ -23,7 +21,7 @@ class Settings(BaseSettings):
     BASE_URL: str
 
     #tests
-    BASE_URL: str
+    TEST_BASE_URL: str
 
     @property
     def DB_URL(self) -> str:

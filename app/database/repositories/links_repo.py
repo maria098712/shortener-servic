@@ -35,14 +35,13 @@ class LinksRepository:
         )
         try:
             result = await self._db.execute(stmt)
-            redirect_link = result.scalar_one()
+            redirect_link = result.scalar_one_or_none()
 
             return redirect_link
 
         except Exception as error:
 
             lg.error(f"Error while trying to get redirect link ->:{error}")
-            await self._db.rollback()
             return ""
 
     # Increases the number of clicks by 1
@@ -72,12 +71,11 @@ class LinksRepository:
 
         try:
             result = await self._db.execute(stmt)
-            clicks = result.scalar_one()
+            clicks = result.scalar_one_or_none()
             return clicks
 
         except Exception as error:
             lg.error(f"Error while trying to get clicks ->:{error}")
-            await self._db.rollback()
             return 0
 
     # Get short link by short link
@@ -90,9 +88,8 @@ class LinksRepository:
 
         try:
             result = await self._db.execute(stmt)
-            short_link = result.scalar_one()
+            short_link = result.scalar_one_or_none()
             return short_link
 
         except Exception as error:
             lg.error(f"Error while trying to get short link ->:{error}")
-            await self._db.rollback()

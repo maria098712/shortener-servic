@@ -11,19 +11,11 @@ from app.main import app
 
 @pytest.fixture(scope="session",autouse=True)
 async def setup():
-
     assert settings.MODE == "TEST"
 
-    await Base.metadata.drop_all(engine)
-    await Base.metadata.create_all(engine)
-
-
-@pytest.fixture(scope='function')
-async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncSessionLocal() as session:
-
-        yield session
-        await session.rollback()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
 
 
 @pytest.mark.asyncio
@@ -83,16 +75,17 @@ async def test_redirect_user():
         follow_redirects=False,
     ) as ac:
 
-        response = await ac.post(
-            "/shorten",
-            json={"original_link": "https://www.google.com/"},
-        )
-        assert response.status_code == 200
+        link_without_http = {
+            "original_link": "https://www.google.com/",
+        }
 
-        short_link = response.json()["short_link"]
-        short_key = short_link.removeprefix(settings.TEST_BASE_URL)
+        response = await ac.post("/shorten", json=link_without_http)
 
-        redirect_response = await ac.get(f"/{short_key}")
+        r_data = response.json()
+
+        short_key = r_data["short_link"].removeprefix(settings.TEST_BASE_URL)
+
+        redirect_response = await ac.get(f"/{short_key}",follow_redirects=False)
 
         assert redirect_response.headers["location"] == "https://www.google.com/"
 

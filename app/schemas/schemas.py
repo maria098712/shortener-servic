@@ -11,5 +11,5 @@ class RedirectUserRequest(BaseModel):
     short_link: str
 
 class GetLinkHitsResponse(BaseModel):
-    response: dict
+    link_clicks: int
 
