@@ -1,8 +1,9 @@
 import pytest
+from httpx import AsyncClient, ASGITransport
+
 from app.database.connection import engine
 from app.models.base import Base
 from app.config import settings
-from httpx import AsyncClient, ASGITransport
 from app.main import app
 
 
@@ -14,27 +15,27 @@ async def setup():
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
+    yield  
+
 
 @pytest.mark.asyncio
 async def test_shorten_link():
-    async with AsyncClient(transport=ASGITransport(app=app),
-                           base_url=settings.BASE_URL) as ac:
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url=settings.BASE_URL
+    ) as ac:
 
-        link_without_http = {
-            "original_link": "google.com",
-        }
+        data = {"original_link": "google.com"}
 
-        response = await ac.post("/shorten", json=link_without_http)
+        response = await ac.post("/shorten", json=data)
 
         assert response.status_code == 200
 
         r_data = response.json()
-
         assert "short_link" in r_data
         assert isinstance(r_data["short_link"], str)
 
-        short_key = r_data["short_link"].removeprefix(settings.BASE_URL)
-
+        short_key = r_data["short_link"].replace(settings.BASE_URL, "")
         assert len(short_key) == 6
 
 
@@ -45,20 +46,16 @@ async def test_shorten_link_with_http():
         base_url=settings.BASE_URL,
     ) as ac:
 
-        link_with_http = {
-            "original_link": "https://www.google.com/",
-        }
+        data = {"original_link": "https://www.google.com/"}
 
-        response = await ac.post("/shorten", json=link_with_http)
+        response = await ac.post("/shorten", json=data)
 
         assert response.status_code == 200
 
         r_data = response.json()
-
         assert "short_link" in r_data
 
-        short_key = r_data["short_link"].removeprefix(settings.BASE_URL)
-
+        short_key = r_data["short_link"].replace(settings.BASE_URL, "")
         assert len(short_key) == 6
 
 
@@ -70,18 +67,17 @@ async def test_redirect_user():
         follow_redirects=False,
     ) as ac:
 
-        link_without_http = {
-            "original_link": "https://www.google.com/",
-        }
+        data = {"original_link": "https://www.google.com/"}
 
-        response = await ac.post("/shorten", json=link_without_http)
+        response = await ac.post("/shorten", json=data)
+        assert response.status_code == 200
 
         r_data = response.json()
+        short_key = r_data["short_link"].replace(settings.BASE_URL, "")
 
-        short_key = r_data["short_link"].removeprefix(settings.BASE_URL)
+        redirect_response = await ac.get(f"/{short_key}")
 
-        redirect_response = await ac.get(f"/{short_key}",follow_redirects=False)
-
+        assert redirect_response.status_code in (301, 307)
         assert redirect_response.headers["location"] == "https://www.google.com/"
 
 
@@ -90,11 +86,9 @@ async def test_redirect_not_found():
     async with AsyncClient(
         transport=ASGITransport(app=app),
         base_url=settings.BASE_URL,
-        follow_redirects=False,
     ) as ac:
 
         response = await ac.get("/unknown-request-test")
-
         assert response.status_code == 404
 
 
@@ -103,18 +97,19 @@ async def test_get_link_stats():
     async with AsyncClient(
         transport=ASGITransport(app=app),
         base_url=settings.BASE_URL,
-        follow_redirects=False,
     ) as ac:
 
         response = await ac.post(
             "/shorten",
             json={"original_link": "https://www.google.com/"},
         )
+
         assert response.status_code == 200
 
         short_link = response.json()["short_link"]
-        short_key = short_link.removeprefix(settings.BASE_URL)
+        short_key = short_link.replace(settings.BASE_URL, "")
 
+        # simulate clicks
         for _ in range(3):
             await ac.get(f"/{short_key}")
 
@@ -123,7 +118,6 @@ async def test_get_link_stats():
         assert stats_response.status_code == 200
 
         data = stats_response.json()
-
         assert "link_clicks" in data
         assert data["link_clicks"] == 3
 
@@ -136,5 +130,4 @@ async def test_get_link_stats_not_found():
     ) as ac:
 
         response = await ac.get("/stats/unknown-request-test")
-
         assert response.status_code == 404
