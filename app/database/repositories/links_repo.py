@@ -10,7 +10,7 @@ class LinksRepository:
     def __init__(self, db: AsyncSession):
         self._db = db
 
-    # Add new link
+    # Add new link (without commit - handled at endpoint/service level)
     async def add_link(self, original_link: str, short_key: str) -> None:
 
         stmt = (
@@ -20,11 +20,11 @@ class LinksRepository:
 
         try:
             await self._db.execute(stmt)
-            await self._db.commit()
+            # Commit is now handled at the service/endpoint level
 
         except Exception as error:
             lg.error(f"Error while trying to insert link ->:{error}")
-            await self._db.rollback()
+            raise  # Propagate exception to be handled at service level
 
     # Get redirect link by short
     async def get_redirect_link(self, short_key: str) -> str:
@@ -44,7 +44,7 @@ class LinksRepository:
             lg.error(f"Error while trying to get redirect link ->:{error}")
             return ""
 
-    # Increases the number of clicks by 1
+    # Increases the number of clicks by 1 (without commit - handled at endpoint level)
     async def increase_click(self, short_key: str) -> None:
 
         stmt = (
@@ -55,11 +55,11 @@ class LinksRepository:
 
         try:
             await self._db.execute(stmt)
-            await self._db.commit()
+            # Commit is now handled at the endpoint level
 
         except Exception as error:
             lg.error(f"Error while trying to update clicks ->:{error}")
-            await self._db.rollback()
+            raise  # Propagate exception to be handled at endpoint level
 
     # Get clicks number
     async def get_link_stats(self, short_key: str) -> int:

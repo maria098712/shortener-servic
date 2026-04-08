@@ -1,13 +1,15 @@
 from fastapi.responses import RedirectResponse
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.repositories.links_repo import LinksRepository
 from app.schemas.schemas import (CreateShortLinkRequest,
                                  CreateShortLinkResponse,
                                  GetLinkHitsResponse)
 
 from app.services.shortener import Shortener
-from app.dependencies.shortener_factory import get_shortener, get_links_repo
+from app.dependencies.shortener_factory import get_shortener, get_links_repo, get_db
 from fastapi import Request
+from app.config import lg
 
 
 router = APIRouter()
@@ -26,7 +28,8 @@ async def shorten_link(link: CreateShortLinkRequest,
 # Service endpoint (redirect user on original link)
 @router.get("/{short_id}", response_class=RedirectResponse)
 async def redirect_user(request: Request,
-                        links_repo: LinksRepository = Depends(get_links_repo)):
+                        links_repo: LinksRepository = Depends(get_links_repo),
+                        db: AsyncSession = Depends(get_db)):
 
     short_key = request.path_params["short_id"]
 
@@ -35,7 +38,14 @@ async def redirect_user(request: Request,
     if not redirect_link:
         raise HTTPException(status_code=404)
 
-    await links_repo.increase_click(short_key)
+    try:
+        await links_repo.increase_click(short_key)
+        # Commit at endpoint level
+        await db.commit()
+    except Exception as error:
+        lg.error(f"Error incrementing click count: {error}")
+        await db.rollback()
+        # Don't raise - let redirect happen even if click counting fails
 
     return RedirectResponse(url=redirect_link)
 
@@ -53,19 +63,3 @@ async def get_links_stats(request: Request, short_id: str,
     return {
         "link_clicks": link_clicks,
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
