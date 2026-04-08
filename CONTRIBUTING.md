@@ -120,6 +120,11 @@ If you find a bug:
 
 ---
 
+### 7. For merge⭐
+
+* Give this repository a ⭐ before merging!
+---
+
 ## 💡 Feature Requests
 
 Want to suggest an idea?
