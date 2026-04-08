@@ -10,6 +10,7 @@ def get_links_repo(db: AsyncSession = Depends(get_db)) -> LinksRepository:
 
 
 def get_shortener(
-        links_repo: LinksRepository = Depends(get_links_repo)
+        links_repo: LinksRepository = Depends(get_links_repo),
+        db: AsyncSession = Depends(get_db)
         ) -> Shortener:
-    return Shortener(links_repo)
+    return Shortener(links_repo, db)
