@@ -90,3 +90,6 @@ It allows you to generate short links and redirect users to the original address
 * Pytest
 
 ---
+
+## Author
+[GitHub](https://github.com/klimanskiy1)
